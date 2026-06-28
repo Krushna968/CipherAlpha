@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>CipherAlpha AI | Midnight Slate Dashboard</title>
+    <script src="/tailwind.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Geist:wght@400;500;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet" crossorigin="anonymous"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary-fixed-dim": "#d2bbff",
+                      "error": "#ffb4ab",
+                      "on-primary": "#3f008e",
+                      "inverse-on-surface": "#2c303b",
+                      "tertiary-fixed": "#6ffbbe",
+                      "on-tertiary-fixed": "#002113",
+                      "outline": "#958da1",
+                      "error-container": "#93000a",
+                      "primary-fixed": "#eaddff",
+                      "tertiary": "#4edea3",
+                      "surface-bright": "#353944",
+                      "surface-container": "#1c1f2a",
+                      "on-secondary-fixed": "#001a42",
+                      "secondary-fixed": "#d8e2ff",
+                      "on-surface-variant": "#ccc3d8",
+                      "background": "#0f131d",
+                      "secondary-fixed-dim": "#adc6ff",
+                      "inverse-surface": "#dfe2f1",
+                      "secondary-container": "#0566d9",
+                      "on-secondary": "#002e6a",
+                      "on-primary-fixed-variant": "#5a00c6",
+                      "surface-tint": "#d2bbff",
+                      "outline-variant": "rgba(223, 226, 241, 0.1)",
+                      "on-primary-container": "#ede0ff",
+                      "surface-variant": "#313540",
+                      "on-secondary-container": "#e6ecff",
+                      "surface": "#0b0f19",
+                      "glass-bg": "rgba(22, 27, 40, 0.6)",
+                      "surface-container-highest": "#313540",
+                      "on-error": "#690005",
+                      "secondary": "#adc6ff",
+                      "on-tertiary": "#003824",
+                      "primary": "#d2bbff",
+                      "primary-container": "#7c3aed",
+                      "surface-container-lowest": "#0a0e18",
+                      "on-error-container": "#ffdad6",
+                      "surface-dim": "#0f131d",
+                      "on-background": "#dfe2f1",
+                      "on-primary-fixed": "#25005a",
+                      "on-tertiary-fixed-variant": "#005236",
+                      "surface-container-high": "#262a35",
+                      "surface-container-low": "#171b26",
+                      "on-surface": "#dfe2f1",
+                      "on-secondary-fixed-variant": "#004395",
+                      "tertiary-container": "#007650",
+                      "inverse-primary": "#732ee4",
+                      "on-tertiary-container": "#76ffc2",
+                      "tertiary-fixed-dim": "#4edea3"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "stack-xl": "48px",
+                      "stack-md": "16px",
+                      "gutter": "24px",
+                      "stack-sm": "8px",
+                      "container-max": "1440px",
+                      "stack-lg": "24px",
+                      "margin-desktop": "48px",
+                      "margin-tablet": "32px",
+                      "stack-xs": "4px",
+                      "margin-mobile": "16px"
+              },
+              "fontFamily": {
+                      "headline-md": ["Inter"],
+                      "label-md": ["Geist"],
+                      "headline-xl": ["Inter"],
+                      "body-lg": ["Inter"],
+                      "headline-lg-mobile": ["Inter"],
+                      "body-md": ["Inter"],
+                      "headline-lg": ["Inter"],
+                      "label-sm": ["Geist"]
+              },
+              "fontSize": {
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                      "headline-xl": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}]
+              }
+            },
+          },
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0b0f19;
+            color: #dfe2f1;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: rgba(22, 27, 40, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(223, 226, 241, 0.1);
+        }
+        .glow-hover:hover {
+            box-shadow: 0 0 20px rgba(124, 58, 237, 0.2);
+            border-color: rgba(210, 187, 255, 0.4);
+        }
+        .typing-dot {
+            animation: typing 1.4s infinite;
+            display: inline-block;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background-color: currentColor;
+            margin-right: 2px;
+        }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-4px); }
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="font-body-md text-body-md min-h-screen flex flex-col">
+    <!-- Background Gradients -->
+    <div class="fixed inset-0 pointer-events-none z-[-1] overflow-hidden">
+        <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 blur-[120px] rounded-full"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-tertiary/5 blur-[120px] rounded-full"></div>
+    </div>
+
+    <!-- Header Navbar -->
+    <header className="fixed top-0 w-full z-50 flex justify-between items-center px-6 py-3 max-w-[1440px] mx-auto bg-glass-bg backdrop-blur-xl border-b border-outline-variant shadow-sm flex-row">
+        <div class="flex items-center gap-3">
+            <img alt="CipherAlpha AI Logo" class="w-10 h-10 object-contain rounded-lg" src="/logo.png" />
+            <span class="font-headline-md text-headline-md font-bold text-primary tracking-tight">CipherAlpha AI</span>
+        </div>
+        <nav class="hidden md:flex items-center gap-8">
+            <a class="text-primary border-b-2 border-primary pb-1 font-label-md text-label-md transition-colors" href="#">Dashboard</a>
+            <a class="text-on-surface-variant hover:text-primary pb-1 font-label-md text-label-md transition-colors" href="https://docs.fhenix.zone" target="_blank" rel="noreferrer">Fhenix Docs</a>
+            <a class="text-on-surface-variant hover:text-primary pb-1 font-label-md text-label-md transition-colors" href="https://github.com" target="_blank" rel="noreferrer">GitHub</a>
+        </nav>
+        <div>
+            <button id="connectWalletBtn" class="bg-primary-container text-on-primary-container px-6 py-2 rounded-lg font-label-md text-label-md font-bold hover:opacity-90 transition-all scale-95 active:scale-90">
+                Connect Wallet
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="mt-24 px-6 md:px-12 w-full max-w-[1440px] mx-auto flex-grow flex flex-col gap-6 pb-12">
+        
+        <!-- Metrics Row -->
+        <section class="grid grid-cols-2 lg:grid-cols-5 gap-4">
+            <div class="glass-panel p-4 rounded-xl glow-hover transition-all duration-300">
+                <div class="flex justify-between items-start mb-1">
+                    <span class="text-on-surface-variant font-label-sm text-[11px] uppercase tracking-wider">Total Portfolio</span>
+                    <span class="material-symbols-outlined text-primary">storefront</span>
+                </div>
+                <div class="font-headline-md text-2xl text-on-surface">$1,248,392</div>
+                <div class="text-tertiary text-[11px] font-semibold mt-1 flex items-center gap-1">
+                    <span class="material-symbols-outlined text-xs">trending_up</span> +12.4%
+                </div>
+            </div>
+
+            <div class="glass-panel p-4 rounded-xl glow-hover transition-all duration-300">
+                <div class="flex justify-between items-start mb-1">
+                    <span class="text-on-surface-variant font-label-sm text-[11px] uppercase tracking-wider">FHE Risk Score</span>
+                    <span class="material-symbols-outlined text-primary">security</span>
+                </div>
+                <div class="font-headline-md text-2xl text-on-surface">Shielded</div>
+                <div class="text-on-surface-variant text-[11px] mt-1">Zero-Knowledge</div>
+            </div>
+
+            <div class="glass-panel p-4 rounded-xl glow-hover transition-all duration-300">
+                <div class="flex justify-between items-start mb-1">
+                    <span class="text-on-surface-variant font-label-sm text-[11px] uppercase tracking-wider">Active Agents</span>
+                    <span class="material-symbols-outlined text-primary">robot</span>
+                </div>
+                <div class="font-headline-md text-2xl text-on-surface">05</div>
+                <div class="text-tertiary text-[11px] mt-1 flex items-center gap-1">
+                    <span class="w-2 h-2 rounded-full bg-tertiary animate-pulse"></span> Multi-Agent Active
+                </div>
+            </div>
+
+            <div class="glass-panel p-4 rounded-xl glow-hover transition-all duration-300">
+                <div class="flex justify-between items-start mb-1">
+                    <span class="text-on-surface-variant font-label-sm text-[11px] uppercase tracking-wider">24h Alpha</span>
+                    <span class="material-symbols-outlined text-primary">show_chart</span>
+                </div>
+                <div class="font-headline-md text-2xl text-on-surface">+3.82%</div>
+                <div class="text-tertiary text-[11px] mt-1">Shielded Vaults</div>
+            </div>
+
+            <div class="glass-panel p-4 rounded-xl glow-hover transition-all duration-300 col-span-2 lg:col-span-1">
+                <div class="flex justify-between items-start mb-1">
+                    <span class="text-on-surface-variant font-label-sm text-[11px] uppercase tracking-wider">Encrypted Tx</span>
+                    <span class="material-symbols-outlined text-primary">lock</span>
+                </div>
+                <div class="font-headline-md text-2xl text-on-surface">1,406</div>
+                <div class="text-on-surface-variant text-[11px] mt-1">Fhenix L2 Verified</div>
+            </div>
+        </section>
+
+        <!-- Core Dashboard Panels Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            
+            <!-- Left Column: ChatGPT panel -->
+            <div class="lg:col-span-8 flex flex-col h-full">
+                <section class="flex flex-col glass-panel rounded-2xl overflow-hidden min-h-[500px] flex-grow border border-outline-variant/30">
+                    <div class="bg-surface-container-high px-6 py-4 border-b border-outline-variant/30 flex justify-between items-center">
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 rounded-full bg-tertiary shadow-[0_0_8px_rgba(78,222,163,0.5)]"></div>
+                            <span class="font-headline-md text-lg font-bold">CipherAlpha Core</span>
+                        </div>
+                        <span class="text-[11px] text-on-surface-variant font-medium">v4.2.0 FHE-Enhanced</span>
+                    </div>
+
+                    <!-- Conversation Message History -->
+                    <div class="flex-grow p-6 flex flex-col gap-6 overflow-y-auto max-h-[380px] min-h-[300px]">
+                        <div class="flex gap-3 max-w-[85%]">
+                            <div class="w-9 h-9 rounded-full bg-primary-container flex items-center justify-center flex-shrink-0">
+                                <span class="material-symbols-outlined text-on-primary-container">psychology</span>
+                            </div>
+                            <div class="bg-surface-container p-4 rounded-2xl rounded-tl-none">
+                                <p class="text-sm leading-relaxed">Greetings. I've completed a confidential audit of your vault. All assets are currently shielded via CoFHE.js. Would you like to simulate a rebalancing execution under zero-knowledge conditions?</p>
+                                <span class="text-[9px] mt-2 block text-on-surface-variant">10:42 AM</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Input Bar and Suggestion Pills -->
+                    <div class="p-6 border-t border-outline-variant/30 bg-surface-container-low">
+                        <div class="relative flex items-center">
+                            <input type="text" placeholder="Type instructions for your intelligence core..." class="w-full bg-surface-container px-4 py-3.5 pr-12 rounded-xl border border-outline-variant/30 focus:border-primary focus:ring-0 text-sm text-on-surface focus:outline-none placeholder-on-surface-variant/50" />
+                            <button class="absolute right-3 bg-primary text-on-primary w-9 h-9 rounded-lg flex items-center justify-center hover:bg-primary-fixed transition-all active:scale-95">
+                                <span class="material-symbols-outlined">send</span>
+                            </button>
+                        </div>
+
+                        <div class="mt-3 flex gap-2 overflow-x-auto pb-1">
+                            <button class="flex-shrink-0 bg-surface-variant/30 text-primary-fixed-dim text-[11px] px-3 py-1.5 rounded-full border border-outline-variant/20 hover:bg-surface-variant/50 transition-colors">
+                                Generate Portfolio Snapshot
+                            </button>
+                            <button class="flex-shrink-0 bg-surface-variant/30 text-primary-fixed-dim text-[11px] px-3 py-1.5 rounded-full border border-outline-variant/20 hover:bg-surface-variant/50 transition-colors">
+                                Verify Contract Safety
+                            </button>
+                            <button class="flex-shrink-0 bg-surface-variant/30 text-primary-fixed-dim text-[11px] px-3 py-1.5 rounded-full border border-outline-variant/20 hover:bg-surface-variant/50 transition-colors">
+                                Suggest Investment
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Right Column: Agent list and Execution Pipeline -->
+            <div class="lg:col-span-4 flex flex-col gap-6">
+                
+                <!-- Multi-Agent Panel -->
+                <aside class="glass-panel p-6 rounded-2xl border border-outline-variant/30 flex flex-col gap-6 w-full">
+                    <div>
+                        <h3 class="font-headline-md text-xl text-on-surface font-bold">Multi-Agent Intelligence</h3>
+                        <p class="text-xs text-on-surface-variant mt-1">Five independent agents analyzing parameters.</p>
+                    </div>
+
+                    <div class="flex flex-col gap-4">
+                        <div class="border border-outline-variant/20 rounded-xl p-3 bg-surface-container-low flex flex-col gap-2">
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-error">shield_alert</span>
+                                    <div>
+                                        <p class="text-xs font-bold text-on-surface">Risk Analyst</p>
+                                        <p class="text-[10px] text-on-surface-variant">Risk preference limits &amp; drawdowns</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="border border-outline-variant/20 rounded-xl p-3 bg-surface-container-low flex flex-col gap-2">
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-tertiary">trending_up</span>
+                                    <div>
+                                        <p class="text-xs font-bold text-on-surface">DeFi Optimizer</p>
+                                        <p class="text-[10px] text-on-surface-variant">APY maximization, staking &amp; yield</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="border border-outline-variant/20 rounded-xl p-3 bg-surface-container-low flex flex-col gap-2">
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-primary">autorenew</span>
+                                    <div>
+                                        <p class="text-xs font-bold text-on-surface">Portfolio Rebalancer</p>
+                                        <p class="text-[10px] text-on-surface-variant">Asset allocation adjustment</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="border border-outline-variant/20 rounded-xl p-3 bg-surface-container-low flex flex-col gap-2">
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-secondary">visibility</span>
+                                    <div>
+                                        <p class="text-xs font-bold text-on-surface">Token Intelligence</p>
+                                        <p class="text-[10px] text-on-surface-variant">Smart contract security &amp; exploits</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="border border-outline-variant/20 rounded-xl p-3 bg-surface-container-low flex flex-col gap-2">
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-primary-fixed-dim">analytics</span>
+                                    <div>
+                                        <p class="text-xs font-bold text-on-surface">Market Sentiment</p>
+                                        <p class="text-[10px] text-on-surface-variant">News crawler &amp; social metrics</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Execution Pipeline -->
+                <section class="glass-panel p-6 rounded-2xl border border-outline-variant/30 flex flex-col gap-6 w-full">
+                    <div>
+                        <h3 class="font-headline-md text-xl text-on-surface font-bold">Execution Pipeline</h3>
+                        <p class="text-xs text-on-surface-variant mt-1">Audit status of zero-knowledge multi-agent path.</p>
+                    </div>
+                    <div class="flex flex-col gap-4">
+                        <div class="flex items-center justify-between text-xs border-b border-outline-variant/10 pb-2">
+                            <span class="text-on-surface-variant">1. Portfolio Snapshot</span>
+                            <span class="text-tertiary font-bold">SUCCESS</span>
+                        </div>
+                        <div class="flex items-center justify-between text-xs border-b border-outline-variant/10 pb-2">
+                            <span class="text-on-surface-variant">2. CoFHE.js Encryption</span>
+                            <span class="text-tertiary font-bold">SUCCESS</span>
+                        </div>
+                        <div class="flex items-center justify-between text-xs border-b border-outline-variant/10 pb-2">
+                            <span class="text-on-surface-variant">3. Fhenix Verification</span>
+                            <span class="text-tertiary font-bold">SUCCESS</span>
+                        </div>
+                        <div class="flex items-center justify-between text-xs border-b border-outline-variant/10 pb-2">
+                            <span class="text-on-surface-variant">4. Agent Arbitration</span>
+                            <span class="text-tertiary font-bold">SUCCESS</span>
+                        </div>
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="text-on-surface-variant">5. Final Execution</span>
+                            <span class="text-primary font-bold animate-pulse">PENDING...</span>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full py-6 px-6 md:px-12 flex flex-col md:flex-row justify-between items-center mt-auto bg-[#0f131d] border-t border-outline-variant/30">
+        <div class="flex flex-col gap-1 mb-4 md:mb-0 text-center md:text-left">
+            <span class="font-label-md text-sm text-on-surface font-bold">CipherAlpha AI</span>
+            <span class="font-label-sm text-[11px] text-on-surface-variant">© 2026 CipherAlpha AI. Built with Fhenix &amp; CoFHE.js</span>
+        </div>
+        <div class="flex gap-8 items-center">
+            <div class="flex gap-4">
+                <a class="text-on-surface-variant hover:text-primary transition-colors font-label-sm text-[11px]" href="#">Terms</a>
+                <a class="text-on-surface-variant hover:text-primary transition-colors font-label-sm text-[11px]" href="#">Privacy</a>
+                <a class="text-on-surface-variant hover:text-primary transition-colors font-label-sm text-[11px]" href="https://github.com" target="_blank" rel="noreferrer">GitHub</a>
+                <a class="text-on-surface-variant hover:text-primary transition-colors font-label-sm text-[11px]" href="https://docs.fhenix.zone" target="_blank" rel="noreferrer">Documentation</a>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module" src="/main.js"></script>
+    <script>
+        // Micro-interaction: Live metrics simulation
+        setInterval(() => {
+            const metrics = document.querySelectorAll('.font-headline-md');
+            if(metrics.length > 0) {
+                const randomMetric = metrics[Math.floor(Math.random() * metrics.length)];
+                if(randomMetric.innerText.includes('$')) {
+                    const currentVal = parseFloat(randomMetric.innerText.replace('$', '').replace(/,/g, ''));
+                    const newVal = currentVal + (Math.random() * 10 - 5);
+                    randomMetric.innerText = '$' + newVal.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0});
+                }
+            }
+        }, 5000);
+
+        // Simple Chat Scroll to Bottom
+        const chatContainer = document.querySelector('.overflow-y-auto');
+        if(chatContainer) {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+    </script>
+</body>
+</html>
