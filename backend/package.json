@@ -1,5 +1,5 @@
 {
-  "name": "cipheralpha-backend",
+  "name": "cipher-alpha-backend",
   "version": "1.0.0",
   "description": "CipherAlpha AI Multi-Agent Intelligence Backend",
   "main": "dist/app.js",

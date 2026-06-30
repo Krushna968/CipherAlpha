@@ -5,7 +5,8 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Load environment variables from backend directory .env
+// Load environment variables from backend directory .env or current working directory
+dotenv.config();
 dotenv.config({ path: path.join(__dirname, '../.env') });
 
 export const config = {

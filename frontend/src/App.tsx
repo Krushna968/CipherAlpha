@@ -1,112 +1,159 @@
-import React from 'react';
-import { Header } from './components/Header.tsx';
-import { Portfolio } from './components/Portfolio.tsx';
+import React, { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Sidebar } from './components/Sidebar.tsx';
 import { AgentPanel } from './components/AgentPanel.tsx';
 import { ChatWindow } from './components/ChatWindow.tsx';
 import { Recommendation } from './components/Recommendation.tsx';
 import { useMetaMask } from './hooks/useMetaMask.ts';
-import { AlertCircle, Terminal, Share2 } from 'lucide-react';
+import { ToastProvider, useToast } from './components/Toast.tsx';
+import { Shield, Zap, Lock } from 'lucide-react';
 
-const App: React.FC = () => {
+const HeroScreen: React.FC = () => (
+  <div className="flex flex-col items-center justify-center h-full text-center px-6">
+    <motion.div
+      initial={{ scale: 0.8, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ duration: 0.8, ease: "easeOut" }}
+      className="relative mb-8"
+    >
+      <div className="absolute inset-0 bg-tertiary/20 blur-[60px] rounded-full" />
+      <Shield className="w-24 h-24 text-tertiary relative z-10" />
+    </motion.div>
+    <motion.h2 
+      initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }}
+      className="text-4xl font-bold text-on-surface mb-4 tracking-tight"
+    >
+      Encrypted <span className="text-transparent bg-clip-text bg-gradient-to-r from-tertiary to-secondary">DeFi Intelligence</span>
+    </motion.h2>
+    <motion.p 
+      initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }}
+      className="text-on-surface-variant max-w-md mx-auto mb-8 font-mono text-xs leading-relaxed"
+    >
+      Connect your wallet to initialize the CoFHE.js secure enclave. 
+      Zero-knowledge proofs and LangGraph agents will analyze your portfolio homomorphically.
+    </motion.p>
+    <motion.div 
+      initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.4 }}
+      className="flex gap-4 justify-center"
+    >
+      <span className="flex items-center gap-2 text-[10px] text-on-surface-variant font-mono bg-surface-container px-3 py-1.5 rounded-full border border-outline-variant/20">
+        <Lock className="w-3 h-3 text-secondary" /> FHE Secured
+      </span>
+      <span className="flex items-center gap-2 text-[10px] text-on-surface-variant font-mono bg-surface-container px-3 py-1.5 rounded-full border border-outline-variant/20">
+        <Zap className="w-3 h-3 text-tertiary" /> Multi-Agent Active
+      </span>
+    </motion.div>
+  </div>
+);
+
+const AppInner: React.FC = () => {
   const {
-    wallet,
-    loadingStates,
-    portfolioData,
-    fheAnalytics,
-    agentResult,
-    errorMsg,
-    connectWallet,
-    disconnectWallet,
-    executeZKAnalytics,
-    refreshDashboard
+    wallet, loadingStates, portfolioData, fheAnalytics, agentResult, errorMsg,
+    connectWallet, disconnectWallet, executeZKAnalytics, refreshDashboard,
   } = useMetaMask();
 
-  const isOrchestrating = loadingStates.runningAgents;
+  const { showToast } = useToast();
+  const [pipelineExecuted, setPipelineExecuted] = useState(false);
+
+  const getPipelineStep = (): number => {
+    if (pipelineExecuted) return 5;
+    if (agentResult) return 4;
+    if (loadingStates.runningAgents) return 3;
+    if (loadingStates.updatingContract || loadingStates.calculatingFhe || loadingStates.requestingDecrypt) return 2;
+    if (loadingStates.encrypting) return 1;
+    return 0;
+  };
+  const pipelineStep = getPipelineStep();
+
+  useEffect(() => {
+    if (errorMsg) showToast('error', errorMsg, 'SYSTEM ERROR');
+  }, [errorMsg, showToast]);
+
+  useEffect(() => {
+    if (agentResult?.selected) {
+      showToast('success', `Agent [${agentResult.selected.agentName}] selected for execution.`, 'ARBITRATION COMPLETE');
+    }
+  }, [agentResult, showToast]);
+
+  useEffect(() => {
+    if (pipelineExecuted) {
+      showToast('success', 'Strategy successfully verified on Fhenix L2.', 'EXECUTION CONFIRMED');
+    }
+  }, [pipelineExecuted, showToast]);
+
+  useEffect(() => {
+    if (loadingStates.encrypting) setPipelineExecuted(false);
+  }, [loadingStates.encrypting]);
 
   return (
-    <div className="font-body-md text-body-md min-h-screen flex flex-col bg-[#0b0f19]">
-      {/* Top Navbar */}
-      <Header 
-        wallet={wallet} 
-        connectWallet={connectWallet} 
-        disconnectWallet={disconnectWallet} 
-      />
+    <div className="font-sans text-on-surface min-h-screen h-screen flex flex-col bg-background overflow-hidden relative">
+      {/* Background Gradients */}
+      <div className="absolute inset-0 pointer-events-none z-[0]">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary-fixed/5 blur-[120px] rounded-full" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-tertiary/5 blur-[120px] rounded-full" />
+      </div>
 
-      {/* Main Content Dashboard */}
-      <main className="mt-24 px-6 md:px-12 w-full max-w-[1440px] mx-auto flex-grow flex flex-col gap-6 pb-12">
-        {/* Error Alert Display */}
-        {errorMsg && (
-          <div className="glass-panel p-4 rounded-xl border-error/30 bg-error/10 text-error flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="text-xs font-bold">Execution Warning</p>
-              <p className="text-xs opacity-90 mt-0.5">{errorMsg}</p>
-            </div>
-          </div>
-        )}
-
-        {/* Top metrics row and configuration form */}
-        <Portfolio 
-          portfolioData={portfolioData}
-          fheAnalytics={fheAnalytics}
-          loadingStates={loadingStates}
-          onRunAnalytics={executeZKAnalytics}
-          isConnected={wallet.isConnected}
-        />
-
-        {/* Core Layout Panels */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* Left Side: ChatGPT dialogue panel */}
-          <div className="lg:col-span-8 flex flex-col h-full">
-            <ChatWindow 
-              fheAnalytics={fheAnalytics} 
-              walletAddress={wallet.address} 
-            />
-          </div>
-
-          {/* Right Side: LangGraph Agent status and Recommendations */}
-          <div className="lg:col-span-4 flex flex-col gap-6">
-            <AgentPanel 
-              isRunning={isOrchestrating} 
-              agentResult={agentResult} 
-            />
-            
-            <Recommendation 
-              agentResult={agentResult} 
-              walletAddress={wallet.address}
-              onSuccess={refreshDashboard}
-            />
-          </div>
-        </div>
-      </main>
-
-      {/* Dashboard Footer */}
-      <footer className="w-full py-6 px-6 md:px-12 flex flex-col md:flex-row justify-between items-center mt-auto bg-[#0f131d] border-t border-outline-variant/30">
-        <div className="flex flex-col gap-1 mb-4 md:mb-0 text-center md:text-left">
-          <span className="font-label-md text-sm text-on-surface font-bold">CipherAlpha AI</span>
-          <span className="font-label-sm text-[11px] text-on-surface-variant">© 2026 CipherAlpha AI. Built with Fhenix &amp; CoFHE.js</span>
-        </div>
+      <main className="relative z-10 w-full h-full max-w-[1600px] mx-auto p-4 flex flex-col lg:flex-row gap-4 overflow-hidden">
         
-        <div className="flex gap-8 items-center">
-          <div className="flex gap-4">
-            <a className="text-on-surface-variant hover:text-primary transition-colors font-label-sm text-[11px]" href="#">Terms</a>
-            <a className="text-on-surface-variant hover:text-primary transition-colors font-label-sm text-[11px]" href="#">Privacy</a>
-            <a className="text-on-surface-variant hover:text-primary transition-colors font-label-sm text-[11px]" href="https://github.com" target="_blank" rel="noreferrer">GitHub</a>
-            <a className="text-on-surface-variant hover:text-primary transition-colors font-label-sm text-[11px]" href="https://docs.fhenix.zone" target="_blank" rel="noreferrer">Documentation</a>
-          </div>
-          
-          <div className="flex gap-2">
-            <div className="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-primary transition-all cursor-pointer border border-outline-variant/30">
-              <Terminal className="w-4.5 h-4.5" />
-            </div>
-            <div className="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-primary transition-all cursor-pointer border border-outline-variant/30">
-              <Share2 className="w-4.5 h-4.5" />
-            </div>
-          </div>
+        {/* LEFT: Sidebar (3 cols) */}
+        <div className="w-full lg:w-[25%] flex-shrink-0 flex flex-col gap-4">
+          <Sidebar 
+            wallet={wallet}
+            connectWallet={connectWallet}
+            disconnectWallet={disconnectWallet}
+            portfolioData={portfolioData}
+            fheAnalytics={fheAnalytics}
+            loadingStates={loadingStates}
+            onRunAnalytics={executeZKAnalytics}
+          />
         </div>
-      </footer>
+
+        {/* CENTER: Chat / Hero (5 cols) */}
+        <div className="w-full lg:w-[45%] flex flex-col h-full bg-surface-variant/30 rounded-2xl border border-outline-variant/30 backdrop-blur-xl relative overflow-hidden">
+           <AnimatePresence mode="wait">
+            {!wallet.isConnected ? (
+              <motion.div key="hero" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="h-full">
+                <HeroScreen />
+              </motion.div>
+            ) : (
+              <motion.div key="chat" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="h-full flex flex-col">
+                {/* Scanner effect when agents running */}
+                {loadingStates.runningAgents && <div className="absolute inset-0 z-0 pointer-events-none scan-line opacity-50" />}
+                <div className="relative z-10 h-full flex flex-col">
+                  <ChatWindow fheAnalytics={fheAnalytics} walletAddress={wallet.address} />
+                </div>
+              </motion.div>
+            )}
+           </AnimatePresence>
+        </div>
+
+        {/* RIGHT: Agent Panel & Execution (4 cols) */}
+        <div className="w-full lg:w-[30%] flex-shrink-0 flex flex-col gap-4 h-full overflow-y-auto scrollbar-hide pr-2 pb-10">
+          <AgentPanel 
+            isRunning={loadingStates.runningAgents}
+            agentResult={agentResult}
+            pipelineStep={pipelineStep}
+          />
+          <Recommendation 
+            agentResult={agentResult}
+            portfolioData={portfolioData}
+            walletAddress={wallet.address}
+            onSuccess={async () => {
+              setPipelineExecuted(true);
+              await refreshDashboard();
+            }}
+          />
+        </div>
+
+      </main>
     </div>
   );
 };
+
+const App: React.FC = () => (
+  <ToastProvider>
+    <AppInner />
+  </ToastProvider>
+);
 
 export default App;
