@@ -54,7 +54,7 @@ const QUICK_PROMPTS = [
   { label: 'AUDIT', msg: 'Verify smart contract safety and check for exploit risks' },
 ];
 
-export const ChatWindow: React.FC<ChatWindowProps> = ({ fheAnalytics, walletAddress }) => {
+export const ChatWindow: React.FC<ChatWindowProps> = ({ fheAnalytics }) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '0',

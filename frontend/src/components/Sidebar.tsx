@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { WalletState } from '../hooks/useMetaMask.ts';
-import { Wallet, Shield, Settings, Activity, ArrowUpRight, Cpu } from 'lucide-react';
+import { Wallet, Settings, Activity, Cpu } from 'lucide-react';
 import { PortfolioHealthGauge } from './PortfolioHealthGauge.tsx';
 
 interface SidebarProps {

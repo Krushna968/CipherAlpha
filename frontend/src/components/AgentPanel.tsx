@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Eye, ShieldAlert, TrendingUp, RefreshCw, BarChart2, CheckSquare, Clock, Loader2, Cpu } from 'lucide-react';
+import { Eye, ShieldAlert, TrendingUp, RefreshCw, BarChart2, Loader2, Cpu } from 'lucide-react';
 
 interface AgentPanelProps {
   isRunning: boolean;

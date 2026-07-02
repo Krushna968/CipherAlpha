@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BrowserProvider, parseEther } from 'ethers';
-import { Shield, TrendingUp, AlertTriangle, Play, Loader2, CheckSquare } from 'lucide-react';
+import { Shield, AlertTriangle, Play } from 'lucide-react';
 import { TokenAllocationChart } from './TokenAllocationChart.tsx';
 
 interface RecommendationProps {
