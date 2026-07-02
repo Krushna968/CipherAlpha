@@ -16,7 +16,7 @@ const CONTRACT_ABI = [
   "function getAnalyticsDecrypted() public view returns (uint32 riskScore, uint32 diversificationScore, uint32 liquidityScore, uint32 yieldExposure, uint32 portfolioHealth)"
 ];
 
-const CONTRACT_ADDRESS = "0x7C3aed633E72a812Dde1f84C3F052a559DE4e3FF"; // Default placeholder / deployed address
+const CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3"; // Local hardhat deployed address
 const BACKEND_URL = "http://localhost:3001/api";
 
 export interface WalletState {
