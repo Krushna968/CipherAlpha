@@ -109,7 +109,7 @@ Rules:
             { role: 'system', content: systemPrompt },
             { role: 'user', content: message }
           ],
-          model: 'llama3-70b-8192',
+          model: 'llama-3.3-70b-versatile',
           max_tokens: 280,
           temperature: 0.72,
         });
