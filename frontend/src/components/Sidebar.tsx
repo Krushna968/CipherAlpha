@@ -18,7 +18,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   wallet, connectWallet, disconnectWallet,
   portfolioData, fheAnalytics, loadingStates, onRunAnalytics
 }) => {
-  const [inputs, setInputs] = useState({
+  const [inputs, setInputs] = useState<Record<string, number | string>>({
     portfolioValue:    125000,
     investmentBudget:  25000,
     riskPreference:    45,
@@ -35,12 +35,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!wallet.isConnected) return;
-    onRunAnalytics(inputs);
+    
+    const processedInputs = Object.fromEntries(
+      Object.entries(inputs).map(([k, v]) => [k, Number(v) || 0])
+    );
+    
+    onRunAnalytics(processedInputs);
     setShowSettings(false);
   };
 
   return (
-    <aside className="h-full flex flex-col gap-4 overflow-y-auto pr-2 scrollbar-hide pb-10">
+    <aside className="lg:h-full h-auto flex flex-col gap-4 lg:overflow-y-auto overflow-y-visible pr-2 scrollbar-hide pb-10">
       
       {/* Brand & Wallet */}
       <div className="glass-panel p-5 rounded-2xl flex flex-col gap-5 border border-tertiary/20 shadow-[0_0_20px_rgba(0,255,148,0.05)]">
@@ -134,8 +139,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <label className="text-[10px] text-on-surface-variant font-mono">{f.label}</label>
                   <input
                     type="number"
-                    value={inputs[f.key as keyof typeof inputs]}
-                    onChange={(e) => setInputs(prev => ({...prev, [f.key]: Number(e.target.value)}))}
+                    value={inputs[f.key]}
+                    onChange={(e) => setInputs(prev => ({...prev, [f.key]: e.target.value === '' ? '' : Number(e.target.value)}))}
                     disabled={isBtnLoading}
                     className="bg-surface border border-outline-variant/20 rounded-lg px-3 py-1.5 text-xs text-on-surface focus:outline-none focus:border-tertiary transition-colors font-mono"
                   />

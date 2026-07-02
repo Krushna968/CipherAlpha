@@ -66,10 +66,15 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ fheAnalytics }) => {
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [typingSteps, setTypingSteps] = useState<string[]>([]);
-  const chatEndRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({
+        top: scrollContainerRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
   }, [messages, isTyping]);
 
   const handleSend = useCallback(async (text: string) => {
@@ -84,7 +89,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ fheAnalytics }) => {
     setTypingSteps(['[INIT] Supervisor Node...']);
 
     try {
-      const res = await fetch('http://localhost:3001/api/chat', {
+      const res = await fetch('http://localhost:3002/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: text, context: fheAnalytics }),
@@ -139,7 +144,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ fheAnalytics }) => {
       </div>
 
       {/* Messages */}
-      <div className="flex-grow p-5 flex flex-col gap-6 overflow-y-auto scrollbar-hide">
+      <div ref={scrollContainerRef} className="flex-grow p-5 flex flex-col gap-6 overflow-y-auto scrollbar-hide">
         <AnimatePresence initial={false}>
           {messages.map((msg) => {
             const isUser = msg.sender === 'user';
@@ -205,7 +210,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ fheAnalytics }) => {
             </div>
           </motion.div>
         )}
-        <div ref={chatEndRef} />
+
       </div>
 
       {/* Input area */}

@@ -17,7 +17,7 @@ const CONTRACT_ABI = [
 ];
 
 const CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3"; // Local hardhat deployed address
-const BACKEND_URL = "http://localhost:3001/api";
+const BACKEND_URL = "http://localhost:3002/api";
 
 export interface WalletState {
   address: string | null;

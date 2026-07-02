@@ -7,6 +7,10 @@ import { Recommendation } from './components/Recommendation.tsx';
 import { useMetaMask } from './hooks/useMetaMask.ts';
 import { ToastProvider, useToast } from './components/Toast.tsx';
 import { Shield, Zap, Lock } from 'lucide-react';
+import { LandingPage } from './components/LandingPage.tsx';
+import { Documentation } from './components/Documentation.tsx';
+import { GlobalLoaderProvider, useGlobalLoader } from './components/GlobalLoader.tsx';
+
 
 const HeroScreen: React.FC = () => (
   <div className="flex flex-col items-center justify-center h-full text-center px-6">
@@ -53,7 +57,14 @@ const AppInner: React.FC = () => {
   } = useMetaMask();
 
   const { showToast } = useToast();
+  const { triggerLoader } = useGlobalLoader();
   const [pipelineExecuted, setPipelineExecuted] = useState(false);
+
+  const handleConnectWallet = () => {
+    triggerLoader(async () => {
+      await connectWallet();
+    }, 'ESTABLISHING SECURE CONNECTION...');
+  };
 
   const getPipelineStep = (): number => {
     if (pipelineExecuted) return 5;
@@ -86,20 +97,20 @@ const AppInner: React.FC = () => {
   }, [loadingStates.encrypting]);
 
   return (
-    <div className="font-sans text-on-surface min-h-screen h-screen flex flex-col bg-background overflow-hidden relative">
+    <div className="font-sans text-on-surface min-h-screen lg:h-screen flex flex-col bg-background lg:overflow-hidden overflow-y-auto relative">
       {/* Background Gradients */}
       <div className="absolute inset-0 pointer-events-none z-[0]">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary-fixed/5 blur-[120px] rounded-full" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-tertiary/5 blur-[120px] rounded-full" />
       </div>
 
-      <main className="relative z-10 w-full h-full max-w-[1600px] mx-auto p-4 flex flex-col lg:flex-row gap-4 overflow-hidden">
+      <main className="relative z-10 w-full lg:h-full max-w-[1600px] mx-auto p-4 flex flex-col lg:flex-row gap-4 lg:overflow-hidden overflow-y-visible">
         
         {/* LEFT: Sidebar (3 cols) */}
         <div className="w-full lg:w-[25%] flex-shrink-0 flex flex-col gap-4">
           <Sidebar 
             wallet={wallet}
-            connectWallet={connectWallet}
+            connectWallet={handleConnectWallet}
             disconnectWallet={disconnectWallet}
             portfolioData={portfolioData}
             fheAnalytics={fheAnalytics}
@@ -109,7 +120,7 @@ const AppInner: React.FC = () => {
         </div>
 
         {/* CENTER: Chat / Hero (5 cols) */}
-        <div className="w-full lg:w-[45%] flex flex-col h-full bg-surface-variant/30 rounded-2xl border border-outline-variant/30 backdrop-blur-xl relative overflow-hidden">
+        <div className="w-full lg:w-[45%] flex flex-col lg:h-full h-[600px] bg-surface-variant/30 rounded-2xl border border-outline-variant/30 backdrop-blur-xl relative overflow-hidden">
            <AnimatePresence mode="wait">
             {!wallet.isConnected ? (
               <motion.div key="hero" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="h-full">
@@ -128,7 +139,7 @@ const AppInner: React.FC = () => {
         </div>
 
         {/* RIGHT: Agent Panel & Execution (4 cols) */}
-        <div className="w-full lg:w-[30%] flex-shrink-0 flex flex-col gap-4 h-full overflow-y-auto scrollbar-hide pr-2 pb-10">
+        <div className="w-full lg:w-[30%] flex-shrink-0 flex flex-col gap-4 lg:h-full h-auto lg:overflow-y-auto overflow-y-visible scrollbar-hide pr-2 pb-10">
           <AgentPanel 
             isRunning={loadingStates.runningAgents}
             agentResult={agentResult}
@@ -150,10 +161,30 @@ const AppInner: React.FC = () => {
   );
 };
 
+const AppContent: React.FC = () => {
+  const [currentView, setCurrentView] = useState<'landing' | 'app' | 'docs'>('landing');
+  const { triggerLoader } = useGlobalLoader();
+
+  return (
+    <ToastProvider>
+      {currentView === 'app' && <AppInner />}
+      {currentView === 'landing' && (
+        <LandingPage 
+          onStart={() => triggerLoader(() => setCurrentView('app'), 'INITIALIZING FHE ENCLAVE...')} 
+          onViewDocs={() => triggerLoader(() => setCurrentView('docs'), 'LOADING DOCUMENTATION...')} 
+        />
+      )}
+      {currentView === 'docs' && (
+        <Documentation onBack={() => triggerLoader(() => setCurrentView('landing'), 'CLOSING DOCUMENTATION...')} />
+      )}
+    </ToastProvider>
+  );
+};
+
 const App: React.FC = () => (
-  <ToastProvider>
-    <AppInner />
-  </ToastProvider>
+  <GlobalLoaderProvider>
+    <AppContent />
+  </GlobalLoaderProvider>
 );
 
 export default App;

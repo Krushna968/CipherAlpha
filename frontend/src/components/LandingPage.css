@@ -1,0 +1,52 @@
+.glass-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+.glass-card:hover {
+  border-color: #00dbe7;
+  box-shadow: 0 0 20px rgba(0, 219, 231, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+}
+.neon-glow-primary {
+  box-shadow: 0 0 24px rgba(0, 219, 231, 0.3);
+}
+.circuit-trace {
+  background-image: radial-gradient(circle at 2px 2px, rgba(255, 255, 255, 0.05) 1px, transparent 0);
+  background-size: 32px 32px;
+}
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s ease-out;
+}
+.reveal.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+@keyframes pulse-cyan {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+.status-pulse {
+  animation: pulse-cyan 2s infinite ease-in-out;
+}
+.marquee {
+  white-space: nowrap;
+  overflow: hidden;
+  display: flex;
+  animation: marquee 30s linear infinite;
+}
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+/* Hide scrollbar for the pipeline */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
