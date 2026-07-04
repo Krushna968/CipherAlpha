@@ -128,7 +128,10 @@ Rules:
       res.json({ reply, agentActivity });
     }, 900);
   } catch (error: any) {
-    res.status(500).json({ error: error.message || 'Failed to process chat' });
+    // Always return a valid response, never an error status
+    console.error('Chat endpoint error:', error.message);
+    const fallbackReply = getChatFallback(req.body?.message || '', req.body?.context);
+    res.json({ reply: fallbackReply, agentActivity: [] });
   }
 });
 

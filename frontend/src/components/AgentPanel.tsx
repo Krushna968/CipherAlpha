@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Eye, ShieldAlert, TrendingUp, RefreshCw, BarChart2, Loader2, Cpu } from 'lucide-react';
+import { Eye, ShieldAlert, TrendingUp, RefreshCw, BarChart2, Loader2, Cpu, CheckCircle2 } from 'lucide-react';
 
 interface AgentPanelProps {
   isRunning: boolean;
@@ -9,15 +9,15 @@ interface AgentPanelProps {
 }
 
 const AGENTS = [
-  { name: 'Risk Analyst', icon: ShieldAlert },
-  { name: 'DeFi Optimizer', icon: TrendingUp },
-  { name: 'Rebalancer', icon: RefreshCw },
-  { name: 'Token Intel', icon: Eye },
-  { name: 'Sentiment', icon: BarChart2 },
+  { name: 'Risk Analyst',  icon: ShieldAlert, color: '#ef4444' },
+  { name: 'DeFi Optimizer', icon: TrendingUp,  color: '#00f0c8' },
+  { name: 'Rebalancer',    icon: RefreshCw,   color: '#0ea5e9' },
+  { name: 'Token Intel',   icon: Eye,          color: '#8b5cf6' },
+  { name: 'Sentiment',     icon: BarChart2,    color: '#f59e0b' },
 ];
 
 const PIPELINE_STEPS = [
-  { label: 'FHE snapshot', activeAt: 1, doneAt: 2 },
+  { label: 'FHE snapshot',  activeAt: 1, doneAt: 2 },
   { label: 'CoFHE encrypt', activeAt: 1, doneAt: 2 },
   { label: 'L2 validation', activeAt: 2, doneAt: 3 },
   { label: 'Agent compute', activeAt: 3, doneAt: 4 },
@@ -26,7 +26,7 @@ const PIPELINE_STEPS = [
 
 export const AgentPanel: React.FC<AgentPanelProps> = ({ isRunning, agentResult, pipelineStep }) => {
   const [progresses, setProgresses] = useState<Record<string, number>>({});
-  const [statuses, setStatuses] = useState<Record<string, string>>({});
+  const [statuses, setStatuses]     = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (isRunning) {
@@ -34,13 +34,9 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({ isRunning, agentResult, 
         setStatuses(p => ({ ...p, [a.name]: 'COMPUTING' }));
         setProgresses(p => ({ ...p, [a.name]: 0 }));
         let prog = 0;
-        const interval = setInterval(() => {
+        const iv = setInterval(() => {
           prog += Math.floor(Math.random() * 12) + 5;
-          if (prog >= 100) {
-            prog = 100;
-            clearInterval(interval);
-            setStatuses(p => ({ ...p, [a.name]: 'DONE' }));
-          }
+          if (prog >= 100) { prog = 100; clearInterval(iv); setStatuses(p => ({ ...p, [a.name]: 'DONE' })); }
           setProgresses(p => ({ ...p, [a.name]: prog }));
         }, 120 + i * 80);
       });
@@ -58,29 +54,61 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({ isRunning, agentResult, 
   }, [isRunning, agentResult]);
 
   return (
-    <div className="flex flex-col gap-4">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+
       {/* Pipeline */}
-      <div className="glass-panel p-4 rounded-xl border-t-2 border-t-tertiary">
-        <h3 className="font-mono text-xs font-bold text-tertiary tracking-widest flex items-center gap-2 mb-3">
-          <Cpu className="w-3.5 h-3.5" /> SYSTEM_PIPELINE
-        </h3>
-        <div className="flex flex-col gap-2.5">
+      <div style={{
+        background: 'rgba(13,17,23,0.7)',
+        border: '1px solid var(--border)',
+        borderTop: '2px solid var(--cyan)',
+        borderRadius: 10,
+        padding: '12px 14px'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
+          <Cpu size={12} color="var(--cyan)" />
+          <span style={{ fontFamily: 'JetBrains Mono', fontSize: 10, color: 'var(--cyan)', letterSpacing: 1.5, textTransform: 'uppercase' }}>
+            SYSTEM_PIPELINE
+          </span>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {PIPELINE_STEPS.map((step, idx) => {
             const status = pipelineStep >= step.doneAt ? 'success' : pipelineStep >= step.activeAt ? 'running' : 'idle';
             return (
-              <div key={step.label} className="flex justify-between items-center text-[10px] font-mono">
-                <div className="flex items-center gap-2">
-                  <span className={`w-1.5 h-1.5 rounded-none flex-shrink-0 ${
-                    status === 'success' ? 'bg-tertiary' : status === 'running' ? 'bg-secondary animate-pulse' : 'bg-outline-variant'
-                  }`} />
-                  <span className={status === 'success' ? 'text-on-surface' : status === 'running' ? 'text-secondary glow-secondary' : 'text-on-surface-variant'}>
+              <div key={step.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div style={{
+                    width: 6, height: 6,
+                    borderRadius: 1,
+                    background: status === 'success' ? 'var(--cyan)' : status === 'running' ? '#0ea5e9' : 'var(--text-dim)',
+                    boxShadow: status !== 'idle' ? `0 0 6px ${status === 'success' ? 'var(--cyan)' : '#0ea5e9'}` : 'none',
+                    flexShrink: 0
+                  }} />
+                  <span style={{
+                    fontFamily: 'JetBrains Mono', fontSize: 10,
+                    color: status === 'success' ? 'var(--text-primary)' : status === 'running' ? '#0ea5e9' : 'var(--text-dim)'
+                  }}>
                     0{idx + 1}_{step.label}
                   </span>
                 </div>
                 <AnimatePresence mode="wait">
-                  {status === 'success' && <motion.span key="ok" initial={{opacity:0}} animate={{opacity:1}} className="text-tertiary">OK</motion.span>}
-                  {status === 'running' && <motion.span key="run" initial={{opacity:0}} animate={{opacity:1}} className="text-secondary animate-pulse flex items-center gap-1"><Loader2 className="w-2.5 h-2.5 animate-spin"/> RUN</motion.span>}
-                  {status === 'idle' && <motion.span key="idle" className="text-on-surface-variant/50">WAIT</motion.span>}
+                  {status === 'success' && (
+                    <motion.span key="ok" initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                      style={{ fontFamily: 'JetBrains Mono', fontSize: 9, color: 'var(--cyan)', display: 'flex', alignItems: 'center', gap: 3 }}>
+                      <CheckCircle2 size={10} /> OK
+                    </motion.span>
+                  )}
+                  {status === 'running' && (
+                    <motion.span key="run" initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                      style={{ fontFamily: 'JetBrains Mono', fontSize: 9, color: '#0ea5e9', display: 'flex', alignItems: 'center', gap: 3 }}>
+                      <Loader2 size={10} className="animate-spin" /> RUN
+                    </motion.span>
+                  )}
+                  {status === 'idle' && (
+                    <motion.span key="wait"
+                      style={{ fontFamily: 'JetBrains Mono', fontSize: 9, color: 'var(--text-dim)' }}>
+                      WAIT
+                    </motion.span>
+                  )}
                 </AnimatePresence>
               </div>
             );
@@ -88,12 +116,21 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({ isRunning, agentResult, 
         </div>
       </div>
 
-      {/* Agents */}
-      <div className="glass-panel p-4 rounded-xl border-t-2 border-t-secondary">
-        <h3 className="font-mono text-xs font-bold text-secondary tracking-widest flex items-center gap-2 mb-3">
-          <Cpu className="w-3.5 h-3.5" /> AGENT_NETWORK
-        </h3>
-        <div className="flex flex-col gap-2">
+      {/* Agent Network */}
+      <div style={{
+        background: 'rgba(13,17,23,0.7)',
+        border: '1px solid var(--border)',
+        borderTop: '2px solid #0ea5e9',
+        borderRadius: 10,
+        padding: '12px 14px'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
+          <Cpu size={12} color="#0ea5e9" />
+          <span style={{ fontFamily: 'JetBrains Mono', fontSize: 10, color: '#0ea5e9', letterSpacing: 1.5, textTransform: 'uppercase' }}>
+            AGENT_NETWORK
+          </span>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {AGENTS.map((agent, i) => {
             const Icon = agent.icon;
             const status = statuses[agent.name] || 'IDLE';
@@ -106,31 +143,52 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({ isRunning, agentResult, 
                 initial={{ opacity: 0, x: 10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.05 }}
-                className={`p-2.5 rounded border transition-all ${
-                  isWinner ? 'border-tertiary bg-tertiary/5 glow-tertiary' : 'border-outline-variant/30 bg-black/20'
-                }`}
+                style={{
+                  padding: '8px 10px', borderRadius: 8,
+                  border: isWinner ? `1px solid ${agent.color}40` : '1px solid var(--border)',
+                  background: isWinner ? `${agent.color}08` : 'rgba(0,0,0,0.2)',
+                  boxShadow: isWinner ? `0 0 12px ${agent.color}20` : 'none',
+                }}
               >
-                <div className="flex justify-between items-center mb-2">
-                  <div className="flex items-center gap-2">
-                    <Icon className={`w-3.5 h-3.5 ${isWinner ? 'text-tertiary' : 'text-on-surface-variant'}`} />
-                    <span className={`text-[10px] font-mono font-bold ${isWinner ? 'text-tertiary' : 'text-on-surface'}`}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <Icon size={12} color={isWinner ? agent.color : 'var(--text-dim)'} />
+                    <span style={{
+                      fontFamily: 'JetBrains Mono', fontSize: 10, fontWeight: 600,
+                      color: isWinner ? agent.color : 'var(--text-primary)'
+                    }}>
                       {agent.name.toUpperCase()}
                     </span>
                   </div>
-                  <span className={`text-[9px] font-mono ${
-                    status === 'DONE' ? 'text-tertiary' : status === 'COMPUTING' ? 'text-secondary animate-pulse' : 'text-on-surface-variant'
-                  }`}>
+                  <span style={{
+                    fontFamily: 'JetBrains Mono', fontSize: 9,
+                    color: status === 'DONE' ? 'var(--cyan)' : status === 'COMPUTING' ? '#0ea5e9' : 'var(--text-dim)'
+                  }}>
                     [{status}]
                   </span>
                 </div>
-                <div className="w-full bg-surface-variant/50 h-0.5 relative overflow-hidden">
-                  <div className={`absolute left-0 top-0 h-full ${status === 'DONE' ? 'bg-tertiary' : 'bg-secondary'}`} style={{ width: `${progress}%` }} />
+                {/* Progress bar */}
+                <div style={{ height: 2, background: 'rgba(255,255,255,0.06)', borderRadius: 1, overflow: 'hidden' }}>
+                  <motion.div
+                    style={{ height: '100%', background: status === 'DONE' ? agent.color : '#0ea5e9', borderRadius: 1 }}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${progress}%` }}
+                    transition={{ duration: 0.3 }}
+                  />
                 </div>
+                {/* Agent stats when done */}
                 {status === 'DONE' && agentResult?.recommendations && (
-                  <div className="mt-2 pt-2 border-t border-outline-variant/20 flex justify-between text-[9px] font-mono text-on-surface-variant">
-                    <span>CONF: <span className="text-secondary">{Math.floor(Math.random()*20 + 80)}%</span></span>
-                    <span>RISK: <span className="text-secondary">{Math.floor(Math.random()*40 + 10)}</span></span>
-                    <span>APY: <span className="text-tertiary">+{Math.floor(Math.random()*15 + 5)}%</span></span>
+                  <div style={{ marginTop: 6, display: 'flex', justifyContent: 'space-between' }}>
+                    {[
+                      { label: 'CONF', value: `${Math.floor(Math.random() * 20 + 80)}%`, color: '#0ea5e9' },
+                      { label: 'RISK', value: `${Math.floor(Math.random() * 40 + 10)}`, color: '#f59e0b' },
+                      { label: 'APY', value: `+${Math.floor(Math.random() * 15 + 5)}%`, color: 'var(--cyan)' },
+                    ].map(s => (
+                      <div key={s.label} style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: 8, color: 'var(--text-dim)', fontFamily: 'JetBrains Mono' }}>{s.label}</div>
+                        <div style={{ fontSize: 10, color: s.color, fontFamily: 'JetBrains Mono', fontWeight: 700 }}>{s.value}</div>
+                      </div>
+                    ))}
                   </div>
                 )}
               </motion.div>
