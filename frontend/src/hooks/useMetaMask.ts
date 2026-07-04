@@ -17,32 +17,32 @@ const CONTRACT_ABI = [
   "function getAnalyticsDecrypted() public view returns (uint32 riskScore, uint32 diversificationScore, uint32 liquidityScore, uint32 yieldExposure, uint32 portfolioHealth)"
 ];
 
-const CONTRACT_ADDRESS = "0xd5462127e6A32aE4dFfF8Eb345E394Eef8416BFd"; // Monad testnet (chainId 10143)
+const CONTRACT_ADDRESS = "0x6306e89bCC84c699780B77210B2F007904d9DcC2"; // Sepolia testnet
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://cipher-alpha-backend.onrender.com/api";
 
-const MONAD_TESTNET_CHAIN_ID_HEX = '0x279f'; // 10143
-const MONAD_TESTNET_PARAMS = {
-  chainId: MONAD_TESTNET_CHAIN_ID_HEX,
-  chainName: 'Monad Testnet',
-  nativeCurrency: { name: 'MON', symbol: 'MON', decimals: 18 },
-  rpcUrls: ['https://testnet-rpc.monad.xyz'],
-  blockExplorerUrls: ['https://testnet.monadexplorer.com'],
+const SEPOLIA_CHAIN_ID_HEX = '0xaa36a7'; // 11155111
+const SEPOLIA_PARAMS = {
+  chainId: SEPOLIA_CHAIN_ID_HEX,
+  chainName: 'Sepolia',
+  nativeCurrency: { name: 'SepoliaETH', symbol: 'ETH', decimals: 18 },
+  rpcUrls: ['https://rpc.sepolia.org'],
+  blockExplorerUrls: ['https://sepolia.etherscan.io'],
 };
 
-const ensureMonadNetwork = async () => {
+const ensureSepoliaNetwork = async () => {
   const currentChainId = await window.ethereum.request({ method: 'eth_chainId' });
-  if (currentChainId === MONAD_TESTNET_CHAIN_ID_HEX) return;
+  if (currentChainId === SEPOLIA_CHAIN_ID_HEX) return;
 
   try {
     await window.ethereum.request({
       method: 'wallet_switchEthereumChain',
-      params: [{ chainId: MONAD_TESTNET_CHAIN_ID_HEX }],
+      params: [{ chainId: SEPOLIA_CHAIN_ID_HEX }],
     });
   } catch (switchError: any) {
     if (switchError.code === 4902) {
       await window.ethereum.request({
         method: 'wallet_addEthereumChain',
-        params: [MONAD_TESTNET_PARAMS],
+        params: [SEPOLIA_PARAMS],
       });
     } else {
       throw switchError;
@@ -91,7 +91,7 @@ export const useMetaMask = () => {
     setErrorMsg(null);
 
     try {
-      await ensureMonadNetwork();
+      await ensureSepoliaNetwork();
       const provider = new BrowserProvider(window.ethereum);
       const accounts = await provider.send('eth_requestAccounts', []);
       const address = accounts[0];
@@ -168,31 +168,27 @@ export const useMetaMask = () => {
     setErrorMsg(null);
 
     try {
-      await ensureMonadNetwork();
+      await ensureSepoliaNetwork();
       // 1. Client-Side Encryption via CoFHE.js
       setLoadingStates(prev => ({ ...prev, encrypting: true }));
-      const chainIdProvider = new BrowserProvider(window.ethereum);
-      const network = await chainIdProvider.getNetwork();
-      const chainId = Number(network.chainId);
+      const provider = new BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
 
       const [
         encVal, encBudget, encRisk, encLiq, encDiv, encApy, encDraw, encTime
       ] = await Promise.all([
-        FheHelper.encryptUint32(inputs.portfolioValue, wallet.address, chainId),
-        FheHelper.encryptUint32(inputs.investmentBudget, wallet.address, chainId),
-        FheHelper.encryptUint32(inputs.riskPreference, wallet.address, chainId),
-        FheHelper.encryptUint32(inputs.liquidityPct, wallet.address, chainId),
-        FheHelper.encryptUint32(inputs.diversificationPct, wallet.address, chainId),
-        FheHelper.encryptUint32(inputs.expectedApy, wallet.address, chainId),
-        FheHelper.encryptUint32(inputs.maxDrawdown, wallet.address, chainId),
-        FheHelper.encryptUint32(inputs.timeHorizon, wallet.address, chainId)
+        FheHelper.encryptUint32(inputs.portfolioValue, signer),
+        FheHelper.encryptUint32(inputs.investmentBudget, signer),
+        FheHelper.encryptUint32(inputs.riskPreference, signer),
+        FheHelper.encryptUint32(inputs.liquidityPct, signer),
+        FheHelper.encryptUint32(inputs.diversificationPct, signer),
+        FheHelper.encryptUint32(inputs.expectedApy, signer),
+        FheHelper.encryptUint32(inputs.maxDrawdown, signer),
+        FheHelper.encryptUint32(inputs.timeHorizon, signer)
       ]);
       setLoadingStates(prev => ({ ...prev, encrypting: false, updatingContract: true }));
 
       // 2. Submit Encrypted Payload to Fhenix L2 Sepolia
-      const provider = new BrowserProvider(window.ethereum);
-
-      const signer = await provider.getSigner();
       const contract = new Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
 
       const tx = await contract.updatePortfolio(

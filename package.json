@@ -18,6 +18,7 @@
   "dependencies": {
     "@cofhe/hardhat-plugin": "^0.4.0",
     "@cofhe/sdk": "^0.4.0",
-    "@fhenixprotocol/cofhe-contracts": "^0.1.0"
+    "@fhenixprotocol/cofhe-contracts": "^0.1.0",
+    "dotenv": "^17.4.2"
   }
 }

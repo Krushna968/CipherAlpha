@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@cofhe/sdk": "^0.6.0",
     "ethers": "^6.13.1",
     "framer-motion": "^11.2.12",
     "lucide-react": "^0.395.0",

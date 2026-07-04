@@ -56,6 +56,16 @@ contract CipherAlpha {
         portfolio.timeHorizon = FHE.asEuint32(_timeHorizon);
         portfolio.isCalculated = false;
 
+        // Allow the contract itself to compute on these values
+        FHE.allow(portfolio.portfolioValue, address(this));
+        FHE.allow(portfolio.investmentBudget, address(this));
+        FHE.allow(portfolio.riskPreference, address(this));
+        FHE.allow(portfolio.liquidityPct, address(this));
+        FHE.allow(portfolio.diversificationPct, address(this));
+        FHE.allow(portfolio.expectedApy, address(this));
+        FHE.allow(portfolio.maxDrawdown, address(this));
+        FHE.allow(portfolio.timeHorizon, address(this));
+
         emit PortfolioUpdated(msg.sender);
     }
 
@@ -86,6 +96,13 @@ contract CipherAlpha {
         euint32 totalHealthSum = dTerm.add(lTerm).add(sTerm);
         portfolio.portfolioHealth = totalHealthSum.div(scale100);
         portfolio.isCalculated = true;
+
+        // Allow the user to view the decrypted results later
+        FHE.allow(portfolio.riskScore, msg.sender);
+        FHE.allow(portfolio.diversificationScore, msg.sender);
+        FHE.allow(portfolio.liquidityScore, msg.sender);
+        FHE.allow(portfolio.yieldExposure, msg.sender);
+        FHE.allow(portfolio.portfolioHealth, msg.sender);
 
         emit AnalyticsCalculated(msg.sender);
     }
