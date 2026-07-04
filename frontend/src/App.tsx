@@ -8,9 +8,9 @@ import { AgentPanel } from './components/AgentPanel.tsx';
 import { Recommendation } from './components/Recommendation.tsx';
 import { PortfolioHealthGauge } from './components/PortfolioHealthGauge.tsx';
 import {
-  Cpu, Wallet, Settings, Activity, Shield, TrendingUp, BarChart2,
-  ChevronDown, ChevronUp, Zap, Lock, LogOut, RefreshCw,
-  ArrowUpRight, ArrowDownRight, Globe, Eye, Layers, Bell
+  Cpu, Wallet, Settings, Activity, Shield,
+  BarChart2, ChevronDown, ChevronUp, Zap, Lock, LogOut,
+  ArrowUpRight, ArrowDownRight, Globe, Layers, Bell
 } from 'lucide-react';
 
 // ─── Sparkline ──────────────────────────────────────────

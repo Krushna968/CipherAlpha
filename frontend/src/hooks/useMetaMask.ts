@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BrowserProvider, Contract, formatEther } from 'ethers';
-import { FheHelper } from '../utils/fhe.ts';
+import { BrowserProvider, formatEther } from 'ethers';
 
 declare global {
   interface Window {
@@ -8,16 +7,6 @@ declare global {
   }
 }
 
-// Deployed Smart Contract ABI
-const CONTRACT_ABI = [
-  "function updatePortfolio(tuple(uint256 ctHash, uint8 securityZone, uint8 utype, bytes signature) _portfolioValue, tuple(uint256 ctHash, uint8 securityZone, uint8 utype, bytes signature) _investmentBudget, tuple(uint256 ctHash, uint8 securityZone, uint8 utype, bytes signature) _riskPreference, tuple(uint256 ctHash, uint8 securityZone, uint8 utype, bytes signature) _liquidityPct, tuple(uint256 ctHash, uint8 securityZone, uint8 utype, bytes signature) _diversificationPct, tuple(uint256 ctHash, uint8 securityZone, uint8 utype, bytes signature) _expectedApy, tuple(uint256 ctHash, uint8 securityZone, uint8 utype, bytes signature) _maxDrawdown, tuple(uint256 ctHash, uint8 securityZone, uint8 utype, bytes signature) _timeHorizon) public",
-  "function computeAnalytics() public",
-  "function requestDecryption() public",
-  "function processPortfolioAnalytics(tuple(uint256 ctHash, uint8 securityZone, uint8 utype, bytes signature) _portfolioValue, tuple(uint256 ctHash, uint8 securityZone, uint8 utype, bytes signature) _investmentBudget, tuple(uint256 ctHash, uint8 securityZone, uint8 utype, bytes signature) _riskPreference, tuple(uint256 ctHash, uint8 securityZone, uint8 utype, bytes signature) _liquidityPct, tuple(uint256 ctHash, uint8 securityZone, uint8 utype, bytes signature) _diversificationPct, tuple(uint256 ctHash, uint8 securityZone, uint8 utype, bytes signature) _expectedApy, tuple(uint256 ctHash, uint8 securityZone, uint8 utype, bytes signature) _maxDrawdown, tuple(uint256 ctHash, uint8 securityZone, uint8 utype, bytes signature) _timeHorizon) public",
-  "function getAnalyticsDecrypted() public view returns (uint32 riskScore, uint32 diversificationScore, uint32 liquidityScore, uint32 yieldExposure, uint32 portfolioHealth)"
-];
-
-const CONTRACT_ADDRESS = "0x0165878A594ca255338adfa4d48449f69242Eb8F"; // Local hardhat deployed address
 const BACKEND_URL = "http://localhost:3001/api";
 
 export interface WalletState {
@@ -123,7 +112,7 @@ export const useMetaMask = () => {
   /**
    * Encrypts and Executes Zero-Knowledge Portfolio Analytics on Sepolia via real CoFHE
    */
-  const executeZKAnalytics = async (inputs: {
+  const executeZKAnalytics = async (_inputs: {
     portfolioValue: number;
     investmentBudget: number;
     riskPreference: number;
@@ -159,27 +148,6 @@ export const useMetaMask = () => {
     } catch (e: any) {
       console.log("[CipherAlpha] Error:", e);
       setLoadingStates({ encrypting: false, updatingContract: false, calculatingFhe: false, requestingDecrypt: false, runningAgents: false });
-    }
-  };
-
-  // Run LangGraph Orchestrator via Backend API
-  const triggerOrchestration = async () => {
-    if (!wallet.address) return;
-    setLoadingStates(prev => ({ ...prev, runningAgents: true }));
-    try {
-      const res = await fetch(`${BACKEND_URL}/orchestrate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ address: wallet.address })
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setAgentResult(data);
-      }
-    } catch (e) {
-      console.error("Agent run failed:", e);
-    } finally {
-      setLoadingStates(prev => ({ ...prev, runningAgents: false }));
     }
   };
 
@@ -219,7 +187,7 @@ export const useMetaMask = () => {
     if (wallet.address) {
       await fetchBackendPortfolio(wallet.address);
       if (fheAnalytics) {
-        await triggerOrchestration();
+        await runSimulatedOrchestration();
       }
     }
   };
