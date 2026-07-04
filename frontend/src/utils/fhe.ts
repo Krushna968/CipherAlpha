@@ -1,6 +1,8 @@
 import { ethers, Signer } from 'ethers';
 import { createCofheClient, createCofheConfig } from '@cofhe/sdk/web';
 import { Encryptable } from '@cofhe/sdk';
+import { createPublicClient, createWalletClient, custom } from 'viem';
+import { sepolia } from 'viem/chains';
 
 export interface InEuint32 {
   ctHash: string;
@@ -18,10 +20,17 @@ export class FheHelper {
     try {
       const config = createCofheConfig({
         environment: 'web',
+        supportedChains: []
       } as any);
       
       const cofheClient = createCofheClient(config);
       const account = await signer.getAddress();
+
+      // Connect the SDK to the browser wallet
+      const transport = custom((window as any).ethereum);
+      const publicClient = createPublicClient({ chain: sepolia, transport });
+      const walletClient = createWalletClient({ chain: sepolia, transport });
+      await cofheClient.connect(publicClient as any, walletClient as any);
 
       // encryptInputs generates the ZK proof needed for production CoFHE Coprocessors
       const encryptedData = await cofheClient
