@@ -19,5 +19,9 @@ export default defineConfig({
       wasm(),
       topLevelAwait()
     ]
+  },
+  optimizeDeps: {
+    exclude: ['@cofhe/sdk', 'tfhe', 'node-tfhe'],
+    include: ['tweetnacl', 'iframe-shared-storage']
   }
 });
