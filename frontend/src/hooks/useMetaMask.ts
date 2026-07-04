@@ -13,11 +13,42 @@ const CONTRACT_ABI = [
   "function updatePortfolio(tuple(uint256 ctHash, uint8 securityZone, uint8 utype, bytes signature) _portfolioValue, tuple(uint256 ctHash, uint8 securityZone, uint8 utype, bytes signature) _investmentBudget, tuple(uint256 ctHash, uint8 securityZone, uint8 utype, bytes signature) _riskPreference, tuple(uint256 ctHash, uint8 securityZone, uint8 utype, bytes signature) _liquidityPct, tuple(uint256 ctHash, uint8 securityZone, uint8 utype, bytes signature) _diversificationPct, tuple(uint256 ctHash, uint8 securityZone, uint8 utype, bytes signature) _expectedApy, tuple(uint256 ctHash, uint8 securityZone, uint8 utype, bytes signature) _maxDrawdown, tuple(uint256 ctHash, uint8 securityZone, uint8 utype, bytes signature) _timeHorizon) public",
   "function computeAnalytics() public",
   "function requestDecryption() public",
+  "function processPortfolioAnalytics(tuple(uint256 ctHash, uint8 securityZone, uint8 utype, bytes signature) _portfolioValue, tuple(uint256 ctHash, uint8 securityZone, uint8 utype, bytes signature) _investmentBudget, tuple(uint256 ctHash, uint8 securityZone, uint8 utype, bytes signature) _riskPreference, tuple(uint256 ctHash, uint8 securityZone, uint8 utype, bytes signature) _liquidityPct, tuple(uint256 ctHash, uint8 securityZone, uint8 utype, bytes signature) _diversificationPct, tuple(uint256 ctHash, uint8 securityZone, uint8 utype, bytes signature) _expectedApy, tuple(uint256 ctHash, uint8 securityZone, uint8 utype, bytes signature) _maxDrawdown, tuple(uint256 ctHash, uint8 securityZone, uint8 utype, bytes signature) _timeHorizon) public",
   "function getAnalyticsDecrypted() public view returns (uint32 riskScore, uint32 diversificationScore, uint32 liquidityScore, uint32 yieldExposure, uint32 portfolioHealth)"
 ];
 
-const CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3"; // Local hardhat deployed address
-const BACKEND_URL = "http://localhost:3002/api";
+const CONTRACT_ADDRESS = "0xd5462127e6A32aE4dFfF8Eb345E394Eef8416BFd"; // Monad testnet (chainId 10143)
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://cipher-alpha-backend.onrender.com/api";
+
+const MONAD_TESTNET_CHAIN_ID_HEX = '0x279f'; // 10143
+const MONAD_TESTNET_PARAMS = {
+  chainId: MONAD_TESTNET_CHAIN_ID_HEX,
+  chainName: 'Monad Testnet',
+  nativeCurrency: { name: 'MON', symbol: 'MON', decimals: 18 },
+  rpcUrls: ['https://testnet-rpc.monad.xyz'],
+  blockExplorerUrls: ['https://testnet.monadexplorer.com'],
+};
+
+const ensureMonadNetwork = async () => {
+  const currentChainId = await window.ethereum.request({ method: 'eth_chainId' });
+  if (currentChainId === MONAD_TESTNET_CHAIN_ID_HEX) return;
+
+  try {
+    await window.ethereum.request({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId: MONAD_TESTNET_CHAIN_ID_HEX }],
+    });
+  } catch (switchError: any) {
+    if (switchError.code === 4902) {
+      await window.ethereum.request({
+        method: 'wallet_addEthereumChain',
+        params: [MONAD_TESTNET_PARAMS],
+      });
+    } else {
+      throw switchError;
+    }
+  }
+};
 
 export interface WalletState {
   address: string | null;
@@ -60,13 +91,14 @@ export const useMetaMask = () => {
     setErrorMsg(null);
 
     try {
+      await ensureMonadNetwork();
       const provider = new BrowserProvider(window.ethereum);
       const accounts = await provider.send('eth_requestAccounts', []);
       const address = accounts[0];
-      
+
       const balanceRaw = await provider.getBalance(address);
       const ethBalance = formatEther(balanceRaw);
-      
+
       const network = await provider.getNetwork();
       const chainId = network.chainId.toString();
 
@@ -136,45 +168,53 @@ export const useMetaMask = () => {
     setErrorMsg(null);
 
     try {
+      await ensureMonadNetwork();
       // 1. Client-Side Encryption via CoFHE.js
       setLoadingStates(prev => ({ ...prev, encrypting: true }));
+      const chainIdProvider = new BrowserProvider(window.ethereum);
+      const network = await chainIdProvider.getNetwork();
+      const chainId = Number(network.chainId);
+
       const [
         encVal, encBudget, encRisk, encLiq, encDiv, encApy, encDraw, encTime
       ] = await Promise.all([
-        FheHelper.encryptUint32(inputs.portfolioValue),
-        FheHelper.encryptUint32(inputs.investmentBudget),
-        FheHelper.encryptUint32(inputs.riskPreference),
-        FheHelper.encryptUint32(inputs.liquidityPct),
-        FheHelper.encryptUint32(inputs.diversificationPct),
-        FheHelper.encryptUint32(inputs.expectedApy),
-        FheHelper.encryptUint32(inputs.maxDrawdown),
-        FheHelper.encryptUint32(inputs.timeHorizon)
+        FheHelper.encryptUint32(inputs.portfolioValue, wallet.address, chainId),
+        FheHelper.encryptUint32(inputs.investmentBudget, wallet.address, chainId),
+        FheHelper.encryptUint32(inputs.riskPreference, wallet.address, chainId),
+        FheHelper.encryptUint32(inputs.liquidityPct, wallet.address, chainId),
+        FheHelper.encryptUint32(inputs.diversificationPct, wallet.address, chainId),
+        FheHelper.encryptUint32(inputs.expectedApy, wallet.address, chainId),
+        FheHelper.encryptUint32(inputs.maxDrawdown, wallet.address, chainId),
+        FheHelper.encryptUint32(inputs.timeHorizon, wallet.address, chainId)
       ]);
       setLoadingStates(prev => ({ ...prev, encrypting: false, updatingContract: true }));
 
       // 2. Submit Encrypted Payload to Fhenix L2 Sepolia
       const provider = new BrowserProvider(window.ethereum);
+
       const signer = await provider.getSigner();
-      
       const contract = new Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-      
+
       const tx = await contract.updatePortfolio(
-        encVal, encBudget, encRisk, encLiq, encDiv, encApy, encDraw, encTime
+        encVal, encBudget, encRisk, encLiq, encDiv, encApy, encDraw, encTime,
+        { gasLimit: 15000000 }
       );
       await tx.wait();
 
       setLoadingStates(prev => ({ ...prev, updatingContract: false, calculatingFhe: true }));
 
-      // 3. Trigger Homomorphic Arithmetic on Fhenix VM
-      const calcTx = await contract.computeAnalytics();
+      // 3. Trigger FHE Analytics Computation
+      const calcTx = await contract.computeAnalytics({ gasLimit: 15000000 });
       await calcTx.wait();
 
       setLoadingStates(prev => ({ ...prev, calculatingFhe: false, requestingDecrypt: true }));
 
-      // 4. Request Decryption Tasks
-      const decryptTx = await contract.requestDecryption();
+      // 4. Request Decryption
+      const decryptTx = await contract.requestDecryption({ gasLimit: 5000000 });
       await decryptTx.wait();
 
+      // Wait a bit to simulate FHE calculation time and oracle fulfillment
+      await new Promise(resolve => setTimeout(resolve, 4000));
       setLoadingStates(prev => ({ ...prev, requestingDecrypt: false }));
 
       // 5. Query Decrypted Analytics
@@ -201,7 +241,7 @@ export const useMetaMask = () => {
         requestingDecrypt: false,
         runningAgents: false
       });
-      
+
       // Fallback: fetch simulated analytics and run orchestration so flow works 100% on any RPC
       await runSimulatedOrchestration();
     }

@@ -110,30 +110,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
         )}
       </div>
 
-      {/* FHE Config Toggle */}
-      <div className="glass-panel p-5 rounded-2xl">
-        <button 
-          onClick={() => setShowSettings(!showSettings)}
-          className="w-full flex justify-between items-center text-sm font-bold text-on-surface hover:text-tertiary transition-colors"
-        >
-          <span className="flex items-center gap-2"><Settings className="w-4 h-4"/> Config & Run Analytics</span>
-          <span className="text-xs">{showSettings ? '▲' : '▼'}</span>
-        </button>
-
-        <AnimatePresence>
-          {showSettings && (
-            <motion.form 
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              onSubmit={handleSubmit}
-              className="mt-4 flex flex-col gap-3 overflow-hidden"
-            >
+      {/* Strategy Parameters (Always Visible) */}
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <div className="glass-panel p-5 rounded-2xl flex flex-col gap-4">
+          <h2 className="text-xs font-bold text-on-surface-variant uppercase tracking-widest flex items-center gap-2">
+            <Settings className="w-3.5 h-3.5" /> Strategy Parameters
+          </h2>
+          
+          {/* Primary Settings */}
+          <div className="flex flex-col gap-4">
+            {/* Valuation & Budget (Numbers) */}
+            <div className="grid grid-cols-2 gap-3">
               {[
                 { key: 'portfolioValue', label: 'Valuation ($)' },
                 { key: 'investmentBudget', label: 'Budget ($)' },
-                { key: 'riskPreference', label: 'Risk Tolerance' },
-                { key: 'expectedApy', label: 'Target APY (%)' },
               ].map(f => (
                 <div key={f.key} className="flex flex-col gap-1">
                   <label className="text-[10px] text-on-surface-variant font-mono">{f.label}</label>
@@ -142,21 +132,104 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     value={inputs[f.key]}
                     onChange={(e) => setInputs(prev => ({...prev, [f.key]: e.target.value === '' ? '' : Number(e.target.value)}))}
                     disabled={isBtnLoading}
-                    className="bg-surface border border-outline-variant/20 rounded-lg px-3 py-1.5 text-xs text-on-surface focus:outline-none focus:border-tertiary transition-colors font-mono"
+                    className="bg-surface-container-low border border-outline-variant/20 rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-tertiary transition-colors font-mono w-full"
                   />
                 </div>
               ))}
-              <button
-                type="submit"
-                disabled={!wallet.isConnected || isBtnLoading}
-                className="mt-2 w-full py-2.5 rounded-lg text-xs font-bold font-mono transition-all bg-tertiary/10 text-tertiary border border-tertiary/30 hover:bg-tertiary/20 disabled:opacity-50"
-              >
-                {isBtnLoading ? 'COMPUTING [FHE]...' : '▶ RUN ZK-ANALYSIS'}
-              </button>
-            </motion.form>
+            </div>
+
+            {/* Risk & APY (Sliders) */}
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-1">
+                <div className="flex justify-between items-center">
+                  <label className="text-[10px] text-on-surface-variant font-mono">Risk Tolerance</label>
+                  <span className="text-xs font-bold text-tertiary">{inputs.riskPreference}</span>
+                </div>
+                <input
+                  type="range"
+                  min="1" max="100"
+                  value={inputs.riskPreference}
+                  onChange={(e) => setInputs(prev => ({...prev, riskPreference: Number(e.target.value)}))}
+                  disabled={isBtnLoading}
+                  className="w-full h-1.5 bg-surface-container-high rounded-lg appearance-none cursor-pointer accent-tertiary"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <div className="flex justify-between items-center">
+                  <label className="text-[10px] text-on-surface-variant font-mono">Target APY (%)</label>
+                  <span className="text-xs font-bold text-secondary">{inputs.expectedApy}%</span>
+                </div>
+                <input
+                  type="range"
+                  min="1" max="100"
+                  value={inputs.expectedApy}
+                  onChange={(e) => setInputs(prev => ({...prev, expectedApy: Number(e.target.value)}))}
+                  disabled={isBtnLoading}
+                  className="w-full h-1.5 bg-surface-container-high rounded-lg appearance-none cursor-pointer accent-secondary"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Advanced Settings Toggle */}
+          <div className="border-t border-outline-variant/10 pt-3 mt-1">
+            <button
+              type="button"
+              onClick={() => setShowSettings(!showSettings)}
+              className="w-full flex justify-between items-center text-xs font-bold text-on-surface-variant hover:text-tertiary transition-colors"
+            >
+              <span className="font-mono">ADVANCED CONFIG</span>
+              <span className="text-[10px]">{showSettings ? '▲' : '▼'}</span>
+            </button>
+            
+            <AnimatePresence>
+              {showSettings && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="grid grid-cols-2 gap-3 pt-4">
+                    {[
+                      { key: 'liquidityPct', label: 'Liquidity (%)', max: 100 },
+                      { key: 'diversificationPct', label: 'Diversification (%)', max: 100 },
+                      { key: 'maxDrawdown', label: 'Max Drawdown (%)', max: 100 },
+                      { key: 'timeHorizon', label: 'Time (Months)', max: 120 },
+                    ].map(f => (
+                      <div key={f.key} className="flex flex-col gap-1">
+                        <label className="text-[9px] text-on-surface-variant font-mono truncate">{f.label}</label>
+                        <input
+                          type="number"
+                          max={f.max}
+                          value={inputs[f.key]}
+                          onChange={(e) => setInputs(prev => ({...prev, [f.key]: e.target.value === '' ? '' : Number(e.target.value)}))}
+                          disabled={isBtnLoading}
+                          className="bg-surface-container-low border border-outline-variant/20 rounded-md px-2 py-1.5 text-xs text-on-surface focus:outline-none focus:border-tertiary transition-colors font-mono w-full"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+
+        {/* Big Action Button */}
+        <button
+          type="submit"
+          disabled={!wallet.isConnected || isBtnLoading}
+          className="w-full py-4 rounded-xl font-bold font-mono transition-all bg-tertiary text-background hover:bg-tertiary-dim glow-tertiary disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2 text-sm shadow-[0_0_20px_rgba(0,255,148,0.3)] mt-2"
+        >
+          {isBtnLoading ? (
+            <span className="animate-pulse">COMPUTING [FHE]...</span>
+          ) : (
+            <>▶ INITIALIZE ZK-ANALYSIS</>
           )}
-        </AnimatePresence>
-      </div>
+        </button>
+      </form>
 
     </aside>
   );

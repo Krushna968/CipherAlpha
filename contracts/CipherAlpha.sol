@@ -148,4 +148,22 @@ contract CipherAlpha {
         euint32 b = FHE.asEuint32(_strategyB);
         return a.gt(b);
     }
+
+    /**
+     * @notice Wrapper to update portfolio, compute analytics, and request decryption in a single transaction.
+     */
+    function processPortfolioAnalytics(
+        InEuint32 calldata _portfolioValue,
+        InEuint32 calldata _investmentBudget,
+        InEuint32 calldata _riskPreference,
+        InEuint32 calldata _liquidityPct,
+        InEuint32 calldata _diversificationPct,
+        InEuint32 calldata _expectedApy,
+        InEuint32 calldata _maxDrawdown,
+        InEuint32 calldata _timeHorizon
+    ) public {
+        updatePortfolio(_portfolioValue, _investmentBudget, _riskPreference, _liquidityPct, _diversificationPct, _expectedApy, _maxDrawdown, _timeHorizon);
+        computeAnalytics();
+        requestDecryption();
+    }
 }
