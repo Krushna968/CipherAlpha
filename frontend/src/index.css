@@ -28,8 +28,8 @@ body {
   background-color: var(--bg-deep);
   color: var(--text-primary);
   font-family: 'Inter', sans-serif;
-  overflow: hidden;
-  height: 100vh;
+  overflow-x: hidden;
+  min-height: 100vh;
 }
 
 /* Scrollbar */
