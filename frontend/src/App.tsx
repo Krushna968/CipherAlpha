@@ -6,6 +6,8 @@ import { GlobalLoaderProvider, useGlobalLoader } from './components/GlobalLoader
 import { ChatWindow } from './components/ChatWindow.tsx';
 import { AgentPanel } from './components/AgentPanel.tsx';
 import { Recommendation } from './components/Recommendation.tsx';
+import { LandingPage } from './components/LandingPage.tsx';
+import { Documentation } from './components/Documentation.tsx';
 import { PortfolioHealthGauge } from './components/PortfolioHealthGauge.tsx';
 import {
   Cpu, Wallet, Settings, Activity, Shield,
@@ -769,11 +771,29 @@ const AppInner: React.FC = () => {
   );
 };
 
+const AppContent: React.FC = () => {
+  const [currentView, setCurrentView] = useState<'landing' | 'app' | 'docs'>('landing');
+  const { triggerLoader } = useGlobalLoader();
+
+  return (
+    <ToastProvider>
+      {currentView === 'app' && <AppInner />}
+      {currentView === 'landing' && (
+        <LandingPage 
+          onStart={() => triggerLoader(() => setCurrentView('app'), 'INITIALIZING FHE ENCLAVE...')} 
+          onViewDocs={() => triggerLoader(() => setCurrentView('docs'), 'LOADING DOCUMENTATION...')} 
+        />
+      )}
+      {currentView === 'docs' && (
+        <Documentation onBack={() => triggerLoader(() => setCurrentView('landing'), 'CLOSING DOCUMENTATION...')} />
+      )}
+    </ToastProvider>
+  );
+};
+
 const App: React.FC = () => (
   <GlobalLoaderProvider>
-    <ToastProvider>
-      <AppInner />
-    </ToastProvider>
+    <AppContent />
   </GlobalLoaderProvider>
 );
 
